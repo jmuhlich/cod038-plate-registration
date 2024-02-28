@@ -4,7 +4,7 @@ import re
 import sys
 
 
-def msg(s):
+def msg(s=""):
     print(s, file=sys.stderr)
 
 
