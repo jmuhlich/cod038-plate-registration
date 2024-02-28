@@ -22,10 +22,10 @@ out_path = pathlib.Path(sys.argv[2])
 
 csv_paths = list(project_path.glob(csv_glob_pattern))
 if not csv_paths:
-    msg(f"No CSV files found at: {project_path / csv_glob_pattern}")
+    msg(f"ERROR: No CSV files found at: {project_path / csv_glob_pattern}")
     sys.exit(1)
 if out_path.suffix != ".csv":
-    msg(f"Output filename does not end with '.csv': {out_path}")
+    msg(f"ERROR: Output filename does not end with '.csv': {out_path}")
     sys.exit(1)
 
 msg("Found CSV files:")
@@ -56,16 +56,27 @@ for c in df.columns:
         if (df[c] == df[oc]).all():
             del df[c]
 
+objnum_columns = df.columns[df.columns.str.endswith("_ObjectNumber")]
+if len(objnum_columns) == 0:
+    msg("ERROR: No _ObjectNumber column present in CSV files")
+    sys.exit(1)
+elif len(objnum_columns) > 1:
+    msg(f"ERROR: Multiple _ObjectNumber columns found:")
+    for c in objnum_columns:
+        msg(f"  {c}")
+    sys.exit(1)
+objnum_column = objnum_columns[0]
+
 df = df.sort_values([
     "Image_Metadata_Plate",
     "Image_Metadata_Well",
     "Image_Metadata_Site",
-    "NucShrinked_ObjectNumber",
+    objnum_column,
 ])
 
 print()
 if out_path.exists():
-    msg(f"Overwriting csv file: {out_path}")
+    msg(f"WARNING: Overwriting csv file: {out_path}")
 else:
     msg(f"Writing merged table: {out_path}")
 df.to_csv(out_path, index=False)
