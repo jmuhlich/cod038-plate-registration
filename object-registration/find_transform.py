@@ -5,9 +5,16 @@ import numpy as np
 import pandas as pd
 import scipy.spatial
 import skimage.measure
+import sys
 
 
-df = pd.read_csv("CellPositions.csv", index_col=0)
+csv1, csv2 = sys.argv[1:3]
+df1 = pd.read_csv(csv1, index_col=False)
+df2 = pd.read_csv(csv2, index_col=False)
+
+if not (df1.columns ==  df2.columns).all():
+    print("CSV file columns don't match")
+    sys.exit(1)
 
 df = df.rename(columns={
     "NucLocation_Center_X": "X",
